@@ -37,7 +37,27 @@ class LoginWindow:
             role = users[username]["role"]
             messagebox.showinfo("Success", f"Welcome {username} ({role})!")
             self.master.destroy()  # Close login window
-            # TODO: Load role-specific dashboard here
+
+            # Load role-specific dashboard
+            root = tk.Tk()
+            root.title(f"{role} Dashboard")
+            root.geometry("500x400")
+
+            if role == "Customer":
+                from dashboard.customer_dashboard import CustomerDashboard
+                CustomerDashboard(root, username)
+            elif role == "Employer":
+                messagebox.showinfo("Success", "comming soon")
+                # from dashboard.employer_dashboard import EmployerDashboard
+                # EmployerDashboard(root, username)
+            elif role == "Manager":
+                messagebox.showinfo("Success", "comming soon!")
+                # from dashboard.manager_dashboard import ManagerDashboard
+                # ManagerDashboard(root, username)
+            else:
+                messagebox.showerror("Error", "Unknown role!")
+
+            root.mainloop()
         else:
             messagebox.showerror("Error", "Invalid username or password.")
 

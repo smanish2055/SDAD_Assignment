@@ -2,5 +2,13 @@
     "xyz": {
         "password": "@Manish12",
         "role": "Manager"
+    },
+    "manish@12": {
+        "password": "@Manish12",
+        "role": "Employer"
+    },
+    "manish@123": {
+        "password": "@Manish12",
+        "role": "Customer"
     }
 }
