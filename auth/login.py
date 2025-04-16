@@ -57,7 +57,7 @@ class LoginWindow:
             else:
                 messagebox.showerror("Error", "Unknown role!")
 
-            root.mainloop()
+            # root.mainloop()
         else:
             messagebox.showerror("Error", "Invalid username or password.")
 
@@ -68,4 +68,3 @@ class LoginWindow:
         register_window.geometry("400x400")
         from auth.register import RegisterWindow
         RegisterWindow(register_window)
-

@@ -107,4 +107,4 @@ class RegisterWindow:
         root.geometry("400x300")
         from auth.login import LoginWindow
         LoginWindow(root)
-        root.mainloop()
+        # root.mainloop()

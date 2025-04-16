@@ -1,34 +1,33 @@
 import tkinter as tk
 from tkinter import messagebox
 import json
+import os
 
 class CustomerDashboard:
     def __init__(self, master, username):
         self.master = master
         self.master.title("Customer Dashboard")
-        self.master.geometry("800x500")
+        self.master.state("zoomed")
 
         self.username = username
 
-        # Main container
         self.main_frame = tk.Frame(master)
         self.main_frame.pack(fill="both", expand=True)
 
-        # Sidebar
         self.sidebar = tk.Frame(self.main_frame, width=200, bg="#2c3e50")
         self.sidebar.pack(side="left", fill="y")
 
-        # Content area
         self.content_area = tk.Frame(self.main_frame, bg="white")
         self.content_area.pack(side="right", fill="both", expand=True)
 
-        # Sidebar buttons
         buttons = [
-            ("Home", self.show_home),  # Home button at the top
+            ("Home", self.show_home),
             ("View Profile", self.view_profile),
             ("Account Summary", self.account_summary),
             ("Perform Transaction", self.transaction),
             ("Transaction History", self.transaction_history),
+            ("Open Account", self.open_account),
+            ("Apply Loan", self.apply_loan),
             ("Logout", self.logout)
         ]
 
@@ -36,7 +35,6 @@ class CustomerDashboard:
             tk.Button(self.sidebar, text=text, width=20, height=2, bg="#34495e", fg="white",
                       activebackground="#16a085", command=command).pack(pady=5, padx=10)
 
-        # Show home content by default
         self.show_home()
 
     def clear_content(self):
@@ -45,20 +43,14 @@ class CustomerDashboard:
 
     def show_home(self):
         self.clear_content()
-
-        # Header
         tk.Label(self.content_area, text="🏠 Dashboard - Personalized Services", font=("Arial", 18, "bold"),
                  bg="white", fg="#2c3e50").pack(pady=20)
-
-        # Welcome User
         tk.Label(self.content_area, text=f"Welcome back, {self.username}", font=("Arial", 14),
                  bg="white", fg="#34495e").pack(pady=5)
 
-        # Divider Line
         divider = tk.Frame(self.content_area, bg="#d0d0d0", height=2)
         divider.pack(fill="x", padx=30, pady=10)
 
-        # Personalized Financial Advice Section
         advice_frame = tk.Frame(self.content_area, bg="white")
         advice_frame.pack(fill="both", expand=False, padx=30, pady=10, anchor="w")
 
@@ -72,14 +64,11 @@ class CustomerDashboard:
             "• Set short-term and long-term financial goals.",
         ]
         for tip in financial_tips:
-            tk.Label(advice_frame, text=tip, font=("Arial", 12), bg="white", fg="#555").pack(anchor="w", padx=20,
-                                                                                             pady=2)
+            tk.Label(advice_frame, text=tip, font=("Arial", 12), bg="white", fg="#555").pack(anchor="w", padx=20, pady=2)
 
-        # Divider
         divider2 = tk.Frame(self.content_area, bg="#d0d0d0", height=2)
         divider2.pack(fill="x", padx=30, pady=10)
 
-        # Recommended Products Section
         product_frame = tk.Frame(self.content_area, bg="white")
         product_frame.pack(fill="both", expand=False, padx=30, pady=10, anchor="w")
 
@@ -93,8 +82,8 @@ class CustomerDashboard:
             "• Credit Score Tracker – stay updated on your financial health.",
         ]
         for product in product_recommendations:
-            tk.Label(product_frame, text=product, font=("Arial", 12), bg="white", fg="#555").pack(anchor="w", padx=20,
-                                                                                                  pady=2)
+            tk.Label(product_frame, text=product, font=("Arial", 12), bg="white", fg="#555").pack(anchor="w", padx=20, pady=2)
+
     def view_profile(self):
         self.clear_content()
         try:
@@ -128,10 +117,80 @@ class CustomerDashboard:
         tk.Label(self.content_area, text="Transaction History", font=("Arial", 16), bg="white").pack(pady=20)
         tk.Label(self.content_area, text="Feature coming soon...", bg="white").pack()
 
+    def open_account(self):
+        self.clear_content()
+
+        tk.Label(self.content_area, text="Open New Account - KYC Details", font=("Arial", 16), bg="white").pack(pady=10)
+
+        fields = {
+            "Full Name": "Enter your full name",
+            "Date of Birth": "YYYY-MM-DD",
+            "Address": "Enter your address",
+            "Citizenship/ID Number": "Enter your ID number",
+            "Phone Number": "Enter phone number",
+            "Email": "Enter your email address",
+            "Occupation": "Enter your occupation"
+        }
+
+        self.account_entries = {}
+
+        for field, placeholder in fields.items():
+            tk.Label(self.content_area, text=field, anchor="w", bg="white").pack(fill="x", padx=40, pady=(10, 2))
+
+            entry = tk.Entry(self.content_area, width=50, fg="grey")
+            entry.insert(0, placeholder)
+
+            # Remove placeholder on focus
+            def on_focus_in(e, ph=placeholder, ent=entry):
+                if ent.get() == ph:
+                    ent.delete(0, "end")
+                    ent.config(fg="black")
+
+            # Add placeholder back if empty
+            def on_focus_out(e, ph=placeholder, ent=entry):
+                if ent.get() == "":
+                    ent.insert(0, ph)
+                    ent.config(fg="grey")
+
+            entry.bind("<FocusIn>", on_focus_in)
+            entry.bind("<FocusOut>", on_focus_out)
+
+            entry.pack(padx=40, pady=2)
+            self.account_entries[field] = entry
+
+        tk.Button(self.content_area, text="Submit for Verification", bg="#16a085", fg="white",
+                  command=self.submit_account_request).pack(pady=20)
+
+    def submit_account_request(self):
+        details = {field: entry.get() for field, entry in self.account_entries.items()}
+        details["username"] = self.username
+        details["status"] = "pending"
+
+        os.makedirs("data", exist_ok=True)
+        filepath = "data/account_requests.json"
+
+        if os.path.exists(filepath):
+            with open(filepath, "r") as f:
+                requests = json.load(f)
+        else:
+            requests = []
+
+        requests.append(details)
+
+        with open(filepath, "w") as f:
+            json.dump(requests, f, indent=4)
+
+        messagebox.showinfo("Submitted", "Your request has been submitted for verification.")
+        self.show_home()
+
+    def apply_loan(self):
+        self.clear_content()
+        tk.Label(self.content_area, text="Apply for Loan", font=("Arial", 16), bg="white").pack(pady=20)
+        tk.Label(self.content_area, text="Feature coming soon...", bg="white").pack()
+
     def logout(self):
         self.master.destroy()
         import auth.login
         root = tk.Tk()
         root.geometry("400x300")
         auth.login.LoginWindow(root)
-        root.mainloop()
