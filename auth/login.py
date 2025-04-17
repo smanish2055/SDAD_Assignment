@@ -47,9 +47,8 @@ class LoginWindow:
                 from dashboard.customer_dashboard import CustomerDashboard
                 CustomerDashboard(root, username)
             elif role == "Employer":
-                messagebox.showinfo("Success", "comming soon")
-                # from dashboard.employer_dashboard import EmployerDashboard
-                # EmployerDashboard(root, username)
+                from dashboard.employer_dashboard import EmployerDashboard
+                EmployerDashboard(root, username)
             elif role == "Manager":
                 messagebox.showinfo("Success", "comming soon!")
                 # from dashboard.manager_dashboard import ManagerDashboard

@@ -1,0 +1,34 @@
+# sidebar_buttons.py
+
+def get_sidebar_buttons(role):
+    if role == "Customer":
+        return [
+            ("Home", "show_home"),
+            ("View Profile", "view_profile"),
+            ("Account Summary", "account_summary"),
+            ("Perform Transaction", "transaction"),
+            ("Transaction History", "transaction_history"),
+            ("Open Account", "open_account"),
+            ("Apply Loan", "apply_loan"),
+            ("Logout", "logout")
+        ]
+
+    elif role == "Employer":
+        return [
+            ("Home", "show_home"),
+            ("View Customers", "view_customers"),
+            ("Approve Accounts", "approve_accounts"),
+            ("Loan Applications", "loan_applications"),
+            ("Logout", "logout")
+        ]
+
+    elif role == "Manager":
+        return [
+            ("Dashboard", "show_home"),
+            ("Reports", "view_reports"),
+            ("Manage Loans", "manage_loans"),
+            ("Logout", "logout")
+        ]
+
+    else:
+        return [("Logout", "logout")]

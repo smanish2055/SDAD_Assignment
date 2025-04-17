@@ -1,45 +1,13 @@
 import tkinter as tk
+from datetime import datetime
 from tkinter import messagebox
 import json
 import os
+from utils.base_dashboard import BaseDashboard
 
-class CustomerDashboard:
+class CustomerDashboard(BaseDashboard):
     def __init__(self, master, username):
-        self.master = master
-        self.master.title("Customer Dashboard")
-        self.master.state("zoomed")
-
-        self.username = username
-
-        self.main_frame = tk.Frame(master)
-        self.main_frame.pack(fill="both", expand=True)
-
-        self.sidebar = tk.Frame(self.main_frame, width=200, bg="#2c3e50")
-        self.sidebar.pack(side="left", fill="y")
-
-        self.content_area = tk.Frame(self.main_frame, bg="white")
-        self.content_area.pack(side="right", fill="both", expand=True)
-
-        buttons = [
-            ("Home", self.show_home),
-            ("View Profile", self.view_profile),
-            ("Account Summary", self.account_summary),
-            ("Perform Transaction", self.transaction),
-            ("Transaction History", self.transaction_history),
-            ("Open Account", self.open_account),
-            ("Apply Loan", self.apply_loan),
-            ("Logout", self.logout)
-        ]
-
-        for text, command in buttons:
-            tk.Button(self.sidebar, text=text, width=20, height=2, bg="#34495e", fg="white",
-                      activebackground="#16a085", command=command).pack(pady=5, padx=10)
-
-        self.show_home()
-
-    def clear_content(self):
-        for widget in self.content_area.winfo_children():
-            widget.destroy()
+        super().__init__(master, username)
 
     def show_home(self):
         self.clear_content()
@@ -126,7 +94,7 @@ class CustomerDashboard:
             "Full Name": "Enter your full name",
             "Date of Birth": "YYYY-MM-DD",
             "Address": "Enter your address",
-            "Citizenship/ID Number": "Enter your ID number",
+            "National Id Number": "Enter your ID number",
             "Phone Number": "Enter phone number",
             "Email": "Enter your email address",
             "Occupation": "Enter your occupation"
@@ -162,9 +130,38 @@ class CustomerDashboard:
                   command=self.submit_account_request).pack(pady=20)
 
     def submit_account_request(self):
-        details = {field: entry.get() for field, entry in self.account_entries.items()}
+        details = {}
+
+        for field, entry in self.account_entries.items():
+            value = entry.get().strip()
+
+            # Skip placeholder
+            if not value or entry.cget("fg") == "grey":
+                messagebox.showerror("Error", f"{field} is required.")
+                return
+            details[field] = value
+
+        # Validate email
+        if not details["Email"].count("@") or "." not in details["Email"]:
+            messagebox.showerror("Invalid Email", "Please enter a valid email address.")
+            return
+
+        # Validate phone number
+        if not details["Phone Number"].isdigit() or len(details["Phone Number"]) < 10:
+            messagebox.showerror("Invalid Phone", "Please enter a valid phone number.")
+            return
+
+        # Validate Date of Birth format
+        try:
+            datetime.strptime(details["Date of Birth"], "%Y-%m-%d")
+        except ValueError:
+            messagebox.showerror("Invalid DOB", "Please enter your Date of Birth in YYYY-MM-DD format.")
+            return
+
+        # Save valid data
         details["username"] = self.username
         details["status"] = "pending"
+        details["request_date"] = datetime.today().strftime("%Y-%m-%d")
 
         os.makedirs("data", exist_ok=True)
         filepath = "data/account_requests.json"
