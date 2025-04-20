@@ -1,18 +1,15 @@
 # base_dashboard.py
 import tkinter as tk
-import json
 from utils.sidebar_buttons import get_sidebar_buttons
 
 class BaseDashboard:
-    def __init__(self, master, username):
+    def __init__(self, master,role, username):
         self.master = master
         self.master.title("Dashboard")
         self.master.state("zoomed")
         self.username = username
 
-        with open("auth/users.json", "r") as f:
-            users = json.load(f)
-            self.role = users.get(username, {}).get("role", "Customer")
+
 
         self.main_frame = tk.Frame(master)
         self.main_frame.pack(fill="both", expand=True)
@@ -24,7 +21,7 @@ class BaseDashboard:
         self.content_area.pack(side="right", fill="both", expand=True)
 
         # Add role-specific buttons
-        buttons = get_sidebar_buttons(self.role)
+        buttons = get_sidebar_buttons(role)
 
         for text, method_name in buttons:
             if hasattr(self, method_name):

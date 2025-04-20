@@ -7,7 +7,7 @@ def get_sidebar_buttons(role):
             ("View Profile", "view_profile"),
             ("Account Summary", "account_summary"),
             ("Perform Transaction", "transaction"),
-            ("Transaction History", "transaction_history"),
+            ("My Transaction History", "transaction_history_customer"),
             ("Open Account", "open_account"),
             ("Apply Loan", "apply_loan"),
             ("Logout", "logout")
@@ -18,7 +18,7 @@ def get_sidebar_buttons(role):
             ("Home", "show_home"),
             ("View Customers", "view_customers"),
             ("Approve Accounts", "approve_accounts"),
-            ("Loan Applications", "loan_applications"),
+            ("Transaction History", "transaction_history_employer_manager"),
             ("Logout", "logout")
         ]
 

@@ -3,18 +3,6 @@
         "Full Name": "manish shah",
         "Date of Birth": "10-10-1998",
         "Address": "e12 6bl , carlyle rd",
-        "National Id Number": "475775757",
-        "Phone Number": "+7570689897",
-        "Email": "smanish2054@gmail.com",
-        "Occupation": "student",
-        "Initial Deposit": "2000",
-        "username": "manish@123",
-        "status": "rejected"
-    },
-    {
-        "Full Name": "manish shah",
-        "Date of Birth": "10-10-1998",
-        "Address": "e12 6bl , carlyle rd",
         "National Id Number": "4757e375757",
         "Phone Number": "+7570689897",
         "Email": "smanish2055@gmail.com",
@@ -24,27 +12,31 @@
         "status": "rejected"
     },
     {
-        "Full Name": "manish shah",
-        "Date of Birth": "10-10-1998",
-        "Address": "e12 6bl , carlyle rd",
-        "National Id Number": "47573t75757",
-        "Phone Number": "+7570689897",
-        "Email": "sffggffgfmanish2055@gmail.com",
+        "Full Name": "manish",
+        "Date of Birth": "1998-10-10",
+        "Address": "e12",
+        "National Id Number": "12345",
+        "Phone Number": "9811344474",
+        "Email": "smanish@gmail.com",
         "Occupation": "student",
-        "Initial Deposit": "2000",
-        "username": "manish@123",
-        "status": "pending"
-    },
-    {
-        "Full Name": "fdsf",
-        "Date of Birth": "1998-03-20",
-        "Address": "sdads",
-        "National Id Number": "3423242",
-        "Phone Number": "9811344744",
-        "Email": "abc@gmail.com",
-        "Occupation": "student",
+        "Account Type": "Personal Account",
         "username": "manish@123",
         "status": "pending",
-        "request_date": "2025-04-18"
+        "request_date": "2025-04-18",
+        "account_id": 1
+    },
+    {
+        "Full Name": "xyz",
+        "Date of Birth": "1997-10-10",
+        "Address": "E23",
+        "National Id Number": "456789",
+        "Phone Number": "9811344474",
+        "Email": "xyz@gmail.com",
+        "Occupation": "business",
+        "Account Type": "Business Account",
+        "username": "manish@123",
+        "status": "pending",
+        "request_date": "2025-04-18",
+        "account_id": 2
     }
 ]

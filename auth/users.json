@@ -10,5 +10,9 @@
     "manish@123": {
         "password": "@Manish12",
         "role": "Customer"
+    },
+    "manish@1234": {
+        "password": "@Manish12",
+        "role": "Customer"
     }
 }
