@@ -1,6 +1,7 @@
 import json
 import os
 import tkinter as tk
+import uuid
 from datetime import datetime
 from tkinter import messagebox, ttk, simpledialog
 import random
@@ -163,6 +164,9 @@ class EmployerDashboard(BaseDashboard):
             tk.Button(button_frame, text="Edit", bg="#2980b9", fg="white",
                       command=lambda acc=acc_no: self.edit_customer(acc)).pack(side="left", padx=5)
 
+            tk.Button(button_frame, text="Withdraw Money", bg="#e67e22", fg="white",
+                      command=lambda acc=acc_no: self.withdraw_money(acc)).pack(side="left", padx=5)
+
             col += 1
             if col >= max_cols:
                 col = 0
@@ -175,18 +179,135 @@ class EmployerDashboard(BaseDashboard):
         self.inner_frame.update_idletasks()
         self.canvas.config(scrollregion=self.canvas.bbox("all"))
 
+    def log_activity(self, action, username, n_id, details):
+        log_path = "data/logs.json"
+
+        if not os.path.exists(log_path):
+            # Create file if it doesn't exist
+            with open(log_path, "w") as f:
+                json.dump([], f)
+
+        # Prepare log entry
+        log_entry = {
+            "action": action,
+            "username": username,
+            "National_Id_Number": n_id,
+            "timestamp": datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
+            "details": details
+        }
+
+        # Read existing logs
+        with open(log_path, "r") as f:
+            logs = json.load(f)
+
+        # Append new log entry
+        logs.append(log_entry)
+
+        # Write the updated log back to file
+        with open(log_path, "w") as f:
+            json.dump(logs, f, indent=4)
+
     def deposit_money(self, acc_no):
         amount = simpledialog.askfloat("Deposit", f"Enter amount to deposit in {acc_no}:", minvalue=1.0)
         if amount:
             account_file = "data/accounts.json"
+            transaction_file = "data/transactions.json"
+
             with open(account_file, "r") as f:
                 accounts = json.load(f)
 
             if acc_no in accounts:
                 accounts[acc_no]["balance"] += amount
+
                 with open(account_file, "w") as f:
                     json.dump(accounts, f, indent=4)
+
+                # Log transaction
+                if os.path.exists(transaction_file):
+                    with open(transaction_file, "r") as f:
+                        transactions = json.load(f)
+                else:
+                    transactions = []
+
+                transaction = {
+                    "T_id": str(uuid.uuid4()),
+                    "e_username": self.username,
+                    "account_number": acc_no,
+                    "type": "Deposit",
+                    "amount": amount,
+                    "reference": "Deposit to account",
+                    "date": datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+                }
+
+                transactions.append(transaction)
+
+                with open(transaction_file, "w") as f:
+                    json.dump(transactions, f, indent=4)
+
+
+                self.log_activity(
+                    "deposit",
+                    self.username,
+                    accounts[acc_no]["national_id_number"],
+                    f"deposit {amount}  in {acc_no} ."
+                )
+
                 messagebox.showinfo("Success", f"${amount:.2f} deposited to {acc_no}.")
+                self.load_and_display_customers(filter_acc_no=self.search_var.get().strip())
+
+    def withdraw_money(self, acc_no):
+        amount = simpledialog.askfloat("Withdraw", f"Enter amount to withdraw from {acc_no}:", minvalue=1.0)
+        if amount:
+            account_file = "data/accounts.json"
+            transaction_file = "data/transactions.json"
+
+            with open(account_file, "r") as f:
+                accounts = json.load(f)
+
+            if acc_no in accounts:
+                current_balance = accounts[acc_no].get("balance", 0)
+                if amount > current_balance:
+                    messagebox.showerror("Insufficient Funds",
+                                         f"Cannot withdraw ${amount:.2f}. Available balance: ${current_balance:.2f}")
+                    return
+
+                # Deduct amount
+                accounts[acc_no]["balance"] -= amount
+
+                # Save updated balance
+                with open(account_file, "w") as f:
+                    json.dump(accounts, f, indent=4)
+
+                # Log transaction
+                if os.path.exists(transaction_file):
+                    with open(transaction_file, "r") as f:
+                        transactions = json.load(f)
+                else:
+                    transactions = []
+
+                transaction = {
+                    "T_id": str(uuid.uuid4()),
+                    "e_username": self.username,
+                    "account_number": acc_no,
+                    "type": "Withdraw",
+                    "amount": amount,
+                    "reference": "Withdrawal from account",
+                    "date": datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+                }
+
+                transactions.append(transaction)
+
+                with open(transaction_file, "w") as f:
+                    json.dump(transactions, f, indent=4)
+
+                self.log_activity(
+                    "withdraw",
+                    self.username,
+                    accounts[acc_no]["national_id_number"],
+                    f"withdraw {amount}  from {acc_no} done by {self.username}."
+                )
+
+                messagebox.showinfo("Success", f"${amount:.2f} withdrawn from {acc_no}.")
                 self.load_and_display_customers(filter_acc_no=self.search_var.get().strip())
 
     def edit_customer(self, acc_no):
@@ -230,10 +351,17 @@ class EmployerDashboard(BaseDashboard):
         def save_changes():
             for key, entry in entries.items():
                 data[key] = entry.get().strip()
-
+            n_id = accounts[acc_no]
             accounts[acc_no] = data
             with open(account_file, "w") as f:
                 json.dump(accounts, f, indent=4)
+
+            self.log_activity(
+                "edit",
+                self.username,
+                n_id["national_id_number"],
+                f"Approved Account with acc number {acc_no} has been edited by {self.username}."
+            )
             messagebox.showinfo("Success", f"Details for {acc_no} updated.")
             edit_win.destroy()
             self.load_and_display_customers(filter_acc_no=self.search_var.get().strip())
@@ -249,9 +377,18 @@ class EmployerDashboard(BaseDashboard):
                 accounts = json.load(f)
 
             if acc_no in accounts:
+                n_id = accounts[acc_no]
                 del accounts[acc_no]
                 with open(account_file, "w") as f:
                     json.dump(accounts, f, indent=4)
+
+                    # Log the deletion activity
+                self.log_activity(
+                        "delete",
+                        self.username,
+                        n_id['national_id_number'],
+                        f"Approved Account with acc no {acc_no} has been deleted."
+                    )
                 messagebox.showinfo("Deleted", f"Account {acc_no} has been deleted.")
                 self.load_and_display_customers(filter_acc_no=self.search_var.get().strip())
 
@@ -343,6 +480,13 @@ class EmployerDashboard(BaseDashboard):
                 if confirm:
                     updated_requests = [r for r in requests if r != req]
                     update_requests_file(updated_requests)
+                    # Log the deletion activity
+                    self.log_activity(
+                        "delete",
+                        self.username,
+                        req['National Id Number'],
+                        f"Account Request N_ID { req['National Id Number']} has been deleted by {self.username}"
+                    )
                     messagebox.showinfo("Deleted", f"Request for {req['Full Name']} has been deleted.")
                     self.approve_accounts()
 
@@ -363,9 +507,16 @@ class EmployerDashboard(BaseDashboard):
                     for key, value in updated_data.items():
                         req[key] = value
 
+                    self.log_activity(
+                        "edit",
+                        self.username,
+                        req['National Id Number'],
+                        f"Account Request edited for N_ID { req['National Id Number']} done by {self.username}."
+                    )
+
                     # Save the updated requests to the JSON file
                     update_requests_file(requests)
-                    messagebox.showinfo("Updated", f"Request for {req['Full Name']} has been updated.")
+                    messagebox.showinfo("Updated", f"Request for N_ID {req['National Id Number']} has been updated.")
                     edit_window.destroy()
                     self.approve_accounts()
 
@@ -437,6 +588,13 @@ class EmployerDashboard(BaseDashboard):
                 updated_requests = [r for r in requests if r != req]
                 update_requests_file(updated_requests)
 
+                self.log_activity(
+                    "approve",
+                    self.username,
+                    req['National Id Number'],
+                    f"Account approved for N_ID { req['National Id Number']} Ac (Account No: {account_number}) done by {self.username}"
+                )
+
                 messagebox.showinfo("Approved",
                                     f"Account for {req['Full Name']} approved with Account No: {account_number}")
                 self.approve_accounts()
@@ -444,6 +602,12 @@ class EmployerDashboard(BaseDashboard):
             def reject_request(req=request):
                 req["status"] = "rejected"
                 update_requests_file(requests)
+                self.log_activity(
+                    "reject",
+                    self.username,
+                    req['National Id Number'],
+                    f"Account request for N_ID {req['National Id Number']} has been rejected by {self.username}"
+                )
                 messagebox.showinfo("Rejected", f"Account request for {req['Full Name']} has been rejected.")
                 self.approve_accounts()
 
@@ -472,6 +636,7 @@ class EmployerDashboard(BaseDashboard):
             canvas.yview_scroll(int(-1 * (event.delta / 120)), "units")
 
         canvas.bind_all("<MouseWheel>", on_mousewheel)
+
 
     def transaction_history_employer_manager(self):
         self.clear_content()
@@ -516,7 +681,8 @@ class EmployerDashboard(BaseDashboard):
             with open(txn_path, "r") as f:
                 transactions = json.load(f)
 
-            filtered = [txn for txn in transactions if txn["account_number"] == acc_no]
+            # Filter transactions related to the account number
+            filtered = [txn for txn in transactions if txn.get("account_number") == acc_no]
 
             for widget in scrollable_frame.winfo_children():
                 widget.destroy()
@@ -525,6 +691,16 @@ class EmployerDashboard(BaseDashboard):
                 tk.Label(scrollable_frame, text="No transactions for this account.", bg="white",
                          font=("Arial", 12)).pack()
                 return
+
+            # ✅ Sort by timestamp - newest first
+            def parse_timestamp(txn):
+                try:
+                    return datetime.strptime(txn["date"], "%Y-%m-%d %H:%M:%S")
+                except Exception as e:
+                    print("Timestamp parse error:", e)
+                    return datetime.min
+
+            filtered = sorted(filtered, key=parse_timestamp, reverse=True)
 
             for txn in filtered:
                 frame = tk.Frame(scrollable_frame, bg="#f4f6f7", bd=1, relief="ridge")
@@ -539,6 +715,72 @@ class EmployerDashboard(BaseDashboard):
 
         tk.Button(self.content_area, text="View History", command=load_history, bg="#2980b9", fg="white",
                   font=("Arial", 12, "bold")).pack(pady=10)
+
+    def open_search_logs_window(self):
+        self.clear_content()
+        search_frame = tk.Frame(self.content_area, bg="white")
+        search_frame.pack(pady=5)
+
+        # --- New National ID Search ---
+        nid_search_frame = tk.Frame(self.content_area, bg="white")
+        nid_search_frame.pack(pady=5)
+
+        tk.Label(nid_search_frame, text="Search Logs by National ID:", bg="white").pack(side="left", padx=(0, 5))
+
+        self.nid_search_var = tk.StringVar()
+        nid_search_entry = tk.Entry(nid_search_frame, textvariable=self.nid_search_var, width=30)
+        nid_search_entry.pack(side="left", padx=(0, 10))
+
+        tk.Button(nid_search_frame, text="Search Logs", command=self.display_logs_by_nid).pack(side="left")
+
+    def display_logs_by_nid(self):
+        nid_number = self.nid_search_var.get().strip()
+
+        try:
+            with open("data/logs.json", "r") as f:
+                logs = json.load(f)
+
+            filtered_logs = [log for log in logs if log.get("National_Id_Number") == nid_number]
+
+            # If logs_display_frame exists, destroy it first
+            if hasattr(self, 'logs_display_frame') and self.logs_display_frame.winfo_exists():
+                self.logs_display_frame.destroy()
+
+            if not filtered_logs:
+                messagebox.showinfo("No Results", f"No logs found for National ID: {nid_number}")
+                return
+
+            # Create a frame for the Text widget and scrollbar
+            self.logs_display_frame = tk.Frame(self.content_area, bg="white")
+            self.logs_display_frame.pack(padx=10, pady=5, fill="both", expand=True)
+
+            # Add Scrollbar
+            scrollbar = tk.Scrollbar(self.logs_display_frame)
+            scrollbar.pack(side="right", fill="y")
+
+            # Text Widget
+            result_text = tk.Text(self.logs_display_frame, wrap="word", height=20, bg="white",
+                                  yscrollcommand=scrollbar.set)
+            result_text.pack(side="left", fill="both", expand=True)
+
+            scrollbar.config(command=result_text.yview)
+
+            for log in reversed(filtered_logs):
+                entry = (
+                    f"Action: {log['action']}\n"
+                    f"Username: {log['username']}\n"
+                    f"Timestamp: {log['timestamp']}\n"
+                    f"Details: {log['details']}\n"
+                    f"{'-' * 40}\n"
+                )
+                result_text.insert(tk.END, entry)
+
+            result_text.config(state="disabled")
+
+        except FileNotFoundError:
+            messagebox.showerror("Error", "logs.json file not found.")
+        except Exception as e:
+            messagebox.showerror("Error", f"An error occurred: {str(e)}")
 
     def logout(self):
         self.master.destroy()

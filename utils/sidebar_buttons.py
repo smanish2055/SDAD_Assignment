@@ -19,6 +19,7 @@ def get_sidebar_buttons(role):
             ("View Customers", "view_customers"),
             ("Approve Accounts", "approve_accounts"),
             ("Transaction History", "transaction_history_employer_manager"),
+            ("Logs", "open_search_logs_window"),
             ("Logout", "logout")
         ]
 
@@ -26,7 +27,6 @@ def get_sidebar_buttons(role):
         return [
             ("Dashboard", "show_home"),
             ("Reports", "view_reports"),
-            ("Manage Loans", "manage_loans"),
             ("Logout", "logout")
         ]
 
