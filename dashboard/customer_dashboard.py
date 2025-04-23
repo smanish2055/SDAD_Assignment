@@ -1,4 +1,5 @@
 import tkinter as tk
+import uuid
 from datetime import datetime
 from tkinter import messagebox, ttk
 import json
@@ -172,25 +173,27 @@ class CustomerDashboard(BaseDashboard):
                 json.dump(accounts, f, indent=4)
 
             now = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-
+            t_id = str(uuid.uuid4())
             sender_log = {
+                "T_id":t_id,
                 "account_number": sender_acc_no,
                 "type": "debited",
                 "from": sender_acc_no,
                 "to": acc_no,
                 "amount": amount,
                 "reference": reference,
-                "timestamp": now
+                "date": now
             }
 
             receiver_log = {
+                "T_id": t_id,
                 "account_number": acc_no,
                 "type": "credited",
                 "from": sender_acc_no,
                 "to": acc_no,
                 "amount": amount,
                 "reference": reference,
-                "timestamp": now
+                "date": now
             }
 
             txn_path = "data/transactions.json"
@@ -253,6 +256,9 @@ class CustomerDashboard(BaseDashboard):
         if not filtered:
             tk.Label(scrollable_frame, text="No transactions for your accounts.", bg="white", font=("Arial", 12)).pack()
             return
+
+        # Sort by timestamp (newest first)
+        filtered = sorted(filtered, key=lambda txn: txn.get("date", ""), reverse=True)
 
         for txn in filtered:
             frame = tk.Frame(scrollable_frame, bg="#f4f6f7", bd=1, relief="ridge")

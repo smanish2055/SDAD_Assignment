@@ -50,9 +50,8 @@ class LoginWindow:
                 from dashboard.employer_dashboard import EmployerDashboard
                 EmployerDashboard(root,role,username)
             elif role == "Manager":
-                messagebox.showinfo("Success", "comming soon!")
-                # from dashboard.manager_dashboard import ManagerDashboard
-                # ManagerDashboard(root, username)
+                from dashboard.manager_dashboard import ManagerDashboard
+                ManagerDashboard(root,role,username)
             else:
                 messagebox.showerror("Error", "Unknown role!")
 
