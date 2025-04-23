@@ -1,8 +1,9 @@
 import tkinter as tk
-from tkinter import messagebox
-from tkinter import ttk
+from tkinter import messagebox, ttk
 import json
 import os
+from enums.roles import UserRole
+
 
 class RegisterWindow:
     def __init__(self, master):
@@ -29,19 +30,16 @@ class RegisterWindow:
 
         # Role selection
         tk.Label(frame, text="Select Role:").grid(row=3, column=0, sticky="e", pady=5, padx=5)
-        self.role_combobox = ttk.Combobox(frame, values=["Customer", "Employer", "Manager"], width=28)
-        self.role_combobox.set("Customer")
+        self.role_combobox = ttk.Combobox(frame, values=[role.value for role in UserRole], width=28)
+        self.role_combobox.set(UserRole.CUSTOMER.value)
         self.role_combobox.grid(row=3, column=1, pady=5)
         self.role_combobox.bind("<<ComboboxSelected>>", self.toggle_passkey_field)
 
-        # Passkey (label and entry directly in main frame, hidden initially)
+        # Passkey fields
         self.passkey_label = tk.Label(frame, text="Enter Passkey:")
         self.passkey_entry = tk.Entry(frame, show="*", width=30)
-
         self.passkey_label.grid(row=4, column=0, sticky="e", pady=5, padx=5)
         self.passkey_entry.grid(row=4, column=1, pady=5)
-
-        # Initially hide passkey widgets
         self.passkey_label.grid_remove()
         self.passkey_entry.grid_remove()
 
@@ -51,7 +49,7 @@ class RegisterWindow:
 
     def toggle_passkey_field(self, event):
         role = self.role_combobox.get()
-        if role == "Employer" or role == "Manager":
+        if role in (UserRole.EMPLOYER.value, UserRole.MANAGER.value):
             self.passkey_label.grid()
             self.passkey_entry.grid()
         else:
@@ -62,8 +60,15 @@ class RegisterWindow:
         username = self.username_entry.get()
         password = self.password_entry.get()
         confirm_password = self.confirm_entry.get()
-        role = self.role_combobox.get()
-        passkey = self.passkey_entry.get() if role != "Customer" else ""
+        role_str = self.role_combobox.get()
+
+        try:
+            role = UserRole(role_str)
+        except ValueError:
+            messagebox.showerror("Error", "Invalid role selected.")
+            return
+
+        passkey = self.passkey_entry.get() if role != UserRole.CUSTOMER else ""
 
         if not username or not password or not confirm_password:
             messagebox.showerror("Error", "All fields are required.")
@@ -73,10 +78,10 @@ class RegisterWindow:
             messagebox.showerror("Error", "Passwords do not match.")
             return
 
-        if role == "Employer" and passkey != "123":
+        if role == UserRole.EMPLOYER and passkey != "123":
             messagebox.showerror("Error", "Invalid passkey for Employer.")
             return
-        elif role == "Manager" and passkey != "456":
+        elif role == UserRole.MANAGER and passkey != "456":
             messagebox.showerror("Error", "Invalid passkey for Manager.")
             return
 
@@ -91,7 +96,7 @@ class RegisterWindow:
 
         users[username] = {
             "password": password,
-            "role": role
+            "role": role.value  # store as string for JSON
         }
 
         with open("auth/users.json", "w") as f:
@@ -107,4 +112,3 @@ class RegisterWindow:
         root.geometry("400x300")
         from auth.login import LoginWindow
         LoginWindow(root)
-        # root.mainloop()
