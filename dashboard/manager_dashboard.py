@@ -1,6 +1,8 @@
-import json
 import os
 import tkinter as tk
+import csv
+import json
+from tkinter import filedialog
 
 from matplotlib import pyplot as plt
 from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
@@ -94,13 +96,93 @@ class ManagerDashboard(BaseDashboard):
 
     def view_reports(self):
         self.clear_content()
-        tk.Label(self.content_area, text="📈 Reports Section", font=("Arial", 18, "bold"), bg="white").pack(pady=20)
+        tk.Label(self.content_area, text="📊 Financial Report Summary", font=("Arial", 18, "bold"), bg="white").pack(
+            pady=10)
 
-        tk.Label(self.content_area,
-                 text="This section is coming soon!\nDetailed financial reports and visualizations will be available here.",
-                 font=("Arial", 14),
-                 bg="white",
-                 fg="gray").pack(pady=50)
+        with open("data/accounts.json") as f:
+            accounts = json.load(f)
+
+        with open("data/transactions.json") as f:
+            transactions = json.load(f)
+
+        total_accounts = len(accounts)
+        total_deposits = sum(
+            t["amount"] for t in transactions if t["type"].lower() == "deposit" or t["type"].lower() == "credited")
+        total_withdrawals = sum(
+            t["amount"] for t in transactions if t["type"].lower() == "withdraw" or t["type"].lower() == "debited")
+
+        summary_frame = tk.Frame(self.content_area, bg="white")
+        summary_frame.pack(pady=10)
+
+        def summary_label(text):
+            return tk.Label(summary_frame, text=text, font=("Arial", 12), bg="white")
+
+        summary_label(f"📌 Total Accounts: {total_accounts}").pack(anchor="w")
+        summary_label(f"💰 Total Deposits: ${total_deposits:,.2f}").pack(anchor="w")
+        summary_label(f"💸 Total Withdrawals: ${total_withdrawals:,.2f}").pack(anchor="w")
+
+        report_data = [
+            ["Account No", "Full Name", "Deposits", "Withdrawals", "Transfers In", "Transfers Out", "Balance"]]
+
+        for acc_num, acc_info in accounts.items():
+            deposits = sum(t["amount"] for t in transactions if
+                           t["account_number"] == acc_num and t["type"].lower() in ["deposit", "credited"])
+            withdrawals = sum(t["amount"] for t in transactions if
+                              t["account_number"] == acc_num and t["type"].lower() in ["withdraw", "debited"])
+            transfers_in = sum(t["amount"] for t in transactions if t.get("to") == acc_num)
+            transfers_out = sum(t["amount"] for t in transactions if t.get("from") == acc_num)
+
+            report_data.append([
+                acc_num,
+                acc_info["full_name"],
+                f"${deposits:,.2f}",
+                f"${withdrawals:,.2f}",
+                f"${transfers_in:,.2f}",
+                f"${transfers_out:,.2f}",
+                f"${acc_info['balance']:,.2f}"
+            ])
+
+        tk.Label(self.content_area, text="📋 Per Account Summary", font=("Arial", 14, "bold"), bg="white").pack(pady=10)
+
+        # --- Scrollable Canvas ---
+        canvas_frame = tk.Frame(self.content_area)
+        canvas_frame.pack(fill="both", expand=True)
+
+        canvas = tk.Canvas(canvas_frame, bg="white")
+        scrollbar = tk.Scrollbar(canvas_frame, orient="vertical", command=canvas.yview)
+        scrollable_frame = tk.Frame(canvas, bg="white")
+
+        scrollable_frame.bind(
+            "<Configure>",
+            lambda e: canvas.configure(scrollregion=canvas.bbox("all"))
+        )
+
+        canvas.create_window((0, 0), window=scrollable_frame, anchor="nw")
+        canvas.configure(yscrollcommand=scrollbar.set)
+
+        canvas.pack(side="left", fill="both", expand=True)
+        scrollbar.pack(side="right", fill="y")
+        # --- End Scrollable Canvas ---
+
+        for col, heading in enumerate(report_data[0]):
+            tk.Label(scrollable_frame, text=heading, bg="white", font=("Arial", 10, "bold"), borderwidth=1,
+                     relief="solid",
+                     width=15).grid(row=0, column=col)
+
+        for row, row_data in enumerate(report_data[1:], start=1):
+            for col, cell in enumerate(row_data):
+                tk.Label(scrollable_frame, text=cell, bg="white", font=("Arial", 10), borderwidth=1, relief="solid",
+                         width=15).grid(row=row, column=col)
+
+        def export_to_csv():
+            file_path = filedialog.asksaveasfilename(defaultextension=".csv", filetypes=[("CSV files", "*.csv")])
+            if file_path:
+                with open(file_path, mode='w', newline='', encoding='utf-8') as f:
+                    writer = csv.writer(f)
+                    writer.writerows(report_data)
+
+        tk.Button(self.content_area, text="⬇️ Download CSV Report", command=export_to_csv, bg="#4CAF50", fg="white",
+                  font=("Arial", 12)).pack(pady=20)
 
     def logout(self):
         self.master.destroy()
