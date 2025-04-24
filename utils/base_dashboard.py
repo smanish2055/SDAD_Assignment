@@ -9,8 +9,6 @@ class BaseDashboard:
         self.master.state("zoomed")
         self.username = username
 
-
-
         self.main_frame = tk.Frame(master)
         self.main_frame.pack(fill="both", expand=True)
 

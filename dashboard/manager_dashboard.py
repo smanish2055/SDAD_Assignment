@@ -3,7 +3,6 @@ import tkinter as tk
 import csv
 import json
 from tkinter import filedialog
-
 from matplotlib import pyplot as plt
 from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
 

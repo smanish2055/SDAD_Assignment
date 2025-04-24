@@ -61,5 +61,26 @@
         "National_Id_Number": "83738449",
         "timestamp": "2025-04-23 18:16:03",
         "details": "withdraw 5000.0  from 8061864 done by manish@12."
+    },
+    {
+        "action": "approve",
+        "username": "manish@12",
+        "National_Id_Number": "77777",
+        "timestamp": "2025-04-24 07:37:50",
+        "details": "Account approved for N_ID 77777 Ac (Account No: 1647514) done by manish@12"
+    },
+    {
+        "action": "approve",
+        "username": "manish@12",
+        "National_Id_Number": "872382",
+        "timestamp": "2025-04-24 17:15:47",
+        "details": "Account approved for N_ID 872382 Ac (Account No: 5483237) done by manish@12"
+    },
+    {
+        "action": "deposit",
+        "username": "manish@12",
+        "National_Id_Number": "872382",
+        "timestamp": "2025-04-24 17:18:55",
+        "details": "deposit 5000.0  in 5483237 ."
     }
 ]

@@ -328,24 +328,22 @@ class CustomerDashboard(BaseDashboard):
 
         for field, entry in self.account_entries.items():
             value = entry.get().strip()
-
-            # Skip placeholder
             if not value or entry.cget("fg") == "grey":
                 messagebox.showerror("Error", f"{field} is required.")
                 return
             details[field] = value
 
-        # Validate email
-        if not details["Email"].count("@") or "." not in details["Email"]:
+            # Validate email
+        if "@" not in details["Email"] or "." not in details["Email"]:
             messagebox.showerror("Invalid Email", "Please enter a valid email address.")
             return
 
-        # Validate phone number
+            # Validate phone number
         if not details["Phone Number"].isdigit() or len(details["Phone Number"]) < 10:
             messagebox.showerror("Invalid Phone", "Please enter a valid phone number.")
             return
 
-        # Validate Date of Birth format
+            # Validate DOB
         try:
             datetime.strptime(details["Date of Birth"], "%Y-%m-%d")
         except ValueError:
@@ -353,40 +351,56 @@ class CustomerDashboard(BaseDashboard):
             return
 
         account_type = self.account_type_var.get()
-        if not account_type:
-            messagebox.showerror("Error", "Please select an account type.")
-            return
+        username = self.username
+        national_id = details["National Id Number"]
 
-        # ✅ Check if the user already has an approved account
         accounts_file = "data/accounts.json"
+        requests_file = "data/account_requests.json"
+
+        all_accounts = {}
         if os.path.exists(accounts_file):
             with open(accounts_file, "r") as f:
                 all_accounts = json.load(f)
-            for acc in all_accounts.values():
-                if acc.get("username") == self.username:
-                    messagebox.showerror("Duplicate Request", "You already have an approved account.")
-                    return
 
-        # ✅ Optional: Check if the user already has a pending request
-        requests_file = "data/account_requests.json"
+        existing_requests = []
         if os.path.exists(requests_file):
             with open(requests_file, "r") as f:
                 existing_requests = json.load(f)
-            for req in existing_requests:
-                if req.get("username") == self.username and req.get("status") == "pending":
-                    messagebox.showerror("Pending Request", "You already have a pending account request.")
-                    return
-        else:
-            existing_requests = []
 
-        # Save valid data
+                # Check for username already used
+        for acc in all_accounts.values():
+            if acc.get("username") == username:
+                messagebox.showerror("Account Exists", "You already have an approved account with this username.")
+                return
+
+        for req in existing_requests:
+            if req.get("username") == username and req.get("status") == "pending":
+                messagebox.showerror("Pending Request",
+                                     "You already have a pending account request with this username.")
+                return
+
+                # Check National ID for the selected Account Type
+        for acc in all_accounts.values():
+            if acc.get("national_id_number") == national_id and acc.get("Account Type",
+                                                                        "Personal Account") == account_type:
+                messagebox.showerror("Duplicate ID", f"This National ID has already been used for a {account_type}.")
+                return
+
+        for req in existing_requests:
+            if req.get("National Id Number") == national_id and req.get("Account Type",
+                                                                        "Personal Account") == account_type:
+                messagebox.showerror("Duplicate ID",
+                                     f"This National ID already has a pending request for a {account_type}.")
+                return
+
+                # All validations passed, save request
         details["Account Type"] = account_type
-        details["username"] = self.username
+        details["username"] = username
         details["status"] = "pending"
         details["request_date"] = datetime.today().strftime("%Y-%m-%d")
 
         if existing_requests:
-            last_id = max([req.get("account_id", 0) for req in existing_requests])
+            last_id = max(req.get("id", 0) for req in existing_requests)
             next_id = last_id + 1
         else:
             next_id = 1
@@ -397,7 +411,8 @@ class CustomerDashboard(BaseDashboard):
         with open(requests_file, "w") as f:
             json.dump(existing_requests, f, indent=4)
 
-        messagebox.showinfo("Submitted", "Your request has been submitted for verification.")
+        messagebox.showinfo("Submitted",
+                            "Your request has been submitted for verification. Visit the nearby office with your ID proof.")
         self.show_home()
 
     def logout(self):

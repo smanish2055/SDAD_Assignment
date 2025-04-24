@@ -140,6 +140,7 @@ class EmployerDashboard(BaseDashboard):
                 "Phone": details.get("phone", ""),
                 "Email": details.get("email", ""),
                 "Occupation": details.get("occupation", ""),
+                "Account Type":details.get("account type",""),
                 "Balance": f"${details.get('balance', 0):,.2f}",
                 "opened date": details.get("approved_date", "")
             }
@@ -578,6 +579,7 @@ class EmployerDashboard(BaseDashboard):
                     "phone": req["Phone Number"],
                     "email": req["Email"],
                     "occupation": req["Occupation"],
+                    "account type":req["Account Type"],
                     "balance": 0,
                     "approved_date": datetime.today().strftime("%Y-%m-%d")
                 }

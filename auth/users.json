@@ -22,5 +22,17 @@
     "manish22": {
         "password": "@Manish12",
         "role": "Employer"
+    },
+    "manish12": {
+        "password": "@Manish12",
+        "role": "Customer"
+    },
+    "aneesh@12": {
+        "password": "@Manish12",
+        "role": "Customer"
+    },
+    "manish123": {
+        "password": "@Manish12",
+        "role": "Customer"
     }
 }
