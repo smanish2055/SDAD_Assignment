@@ -2,7 +2,8 @@ import tkinter as tk
 from tkinter import messagebox
 import json
 import os
-from auth.register import RegisterWindow  # Only import RegisterWindow here.
+import bcrypt
+from auth.register import RegisterWindow
 
 class LoginWindow:
     def __init__(self, master):
@@ -33,29 +34,33 @@ class LoginWindow:
         with open("auth/users.json", "r") as f:
             users = json.load(f)
 
-        if username in users and users[username]["password"] == password:
-            role = users[username]["role"]
-            messagebox.showinfo("Success", f"Welcome {username} ({role})!")
-            self.master.destroy()  # Close login window
+        if username in users:
+            stored_hashed_password = users[username]["password"]
 
-            # Load role-specific dashboard
-            root = tk.Tk()
-            root.title(f"{role} Dashboard")
-            root.geometry("500x400")
+            # Check if the provided password matches the hashed password
+            if bcrypt.checkpw(password.encode('utf-8'), stored_hashed_password.encode('utf-8')):
+                role = users[username]["role"]
+                messagebox.showinfo("Success", f"Welcome {username} ({role})!")
+                self.master.destroy()  # Close login window
 
-            if role == "Customer":
-                from dashboard.customer_dashboard import CustomerDashboard
-                CustomerDashboard(root,role, username)
-            elif role == "Employer":
-                from dashboard.employer_dashboard import EmployerDashboard
-                EmployerDashboard(root,role,username)
-            elif role == "Manager":
-                from dashboard.manager_dashboard import ManagerDashboard
-                ManagerDashboard(root,role,username)
+                # Load role-specific dashboard
+                root = tk.Tk()
+                root.title(f"{role} Dashboard")
+                root.geometry("500x400")
+
+                if role == "Customer":
+                    from dashboard.customer_dashboard import CustomerDashboard
+                    CustomerDashboard(root, role, username)
+                elif role == "Employer":
+                    from dashboard.employer_dashboard import EmployerDashboard
+                    EmployerDashboard(root, role, username)
+                elif role == "Manager":
+                    from dashboard.manager_dashboard import ManagerDashboard
+                    ManagerDashboard(root, role, username)
+                else:
+                    messagebox.showerror("Error", "Unknown role!")
             else:
-                messagebox.showerror("Error", "Unknown role!")
-
-            # root.mainloop()
+                messagebox.showerror("Error", "Invalid username or password.")
         else:
             messagebox.showerror("Error", "Invalid username or password.")
 

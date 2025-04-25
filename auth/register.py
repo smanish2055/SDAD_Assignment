@@ -2,8 +2,8 @@ import tkinter as tk
 from tkinter import messagebox, ttk
 import json
 import os
+import bcrypt
 from enums.roles import UserRole
-
 
 class RegisterWindow:
     def __init__(self, master):
@@ -94,9 +94,12 @@ class RegisterWindow:
             messagebox.showerror("Error", "Username already exists.")
             return
 
+        # Hash the password using bcrypt
+        hashed_password = bcrypt.hashpw(password.encode('utf-8'), bcrypt.gensalt()).decode('utf-8')
+
         users[username] = {
-            "password": password,
-            "role": role.value  # store as string for JSON
+            "password": hashed_password,
+            "role": role.value
         }
 
         with open("auth/users.json", "w") as f:
