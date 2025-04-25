@@ -8,7 +8,7 @@
         "phone": "9812122334",
         "email": "sdh@gmail.com",
         "occupation": "businesses",
-        "balance": 60000.0,
+        "balance": 76000.0,
         "approved_date": "2025-04-18"
     },
     "9678021": {
@@ -33,7 +33,7 @@
         "email": "smanish20@gmail.com",
         "occupation": "student",
         "Account Type": "Personal Account",
-        "balance": 64000.0,
+        "balance": 48000.0,
         "approved_date": "2025-04-20"
     }
 }

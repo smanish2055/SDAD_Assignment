@@ -1,6 +1,15 @@
-# sidebar_buttons.py
+import json
+
+def get_pending_count():
+    try:
+        with open('data/pending_transactions.json', 'r') as file:
+            data = json.load(file)
+        return len(data)
+    except FileNotFoundError:
+        return 0
 
 def get_sidebar_buttons(role):
+
     if role == "Customer":
         return [
             ("Home", "show_home"),
@@ -14,11 +23,13 @@ def get_sidebar_buttons(role):
         ]
 
     elif role == "Employer":
+        count = get_pending_count()
         return [
             ("Home", "show_home"),
             ("View Customers", "view_customers"),
             ("Approve Accounts", "approve_accounts"),
             ("Transaction History", "transaction_history_employer_manager"),
+            (f"Suspicious Notification ({count})", "suspicious_notification"),
             ("Logs", "open_search_logs_window"),
             ("Logout", "logout")
         ]

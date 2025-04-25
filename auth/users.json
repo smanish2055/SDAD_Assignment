@@ -34,5 +34,9 @@
     "manish123": {
         "password": "@Manish12",
         "role": "Customer"
+    },
+    "shah12": {
+        "password": "$2b$12$RE8ajJV4Ui7eeK2aYrRwd.corrOw7qnBKJC.ZurXi7oMYz8jaPUN2",
+        "role": "Employer"
     }
 }

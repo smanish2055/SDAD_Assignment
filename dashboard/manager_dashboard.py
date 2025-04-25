@@ -25,7 +25,6 @@ class ManagerDashboard(BaseDashboard):
         total_approved = 0
         total_pending = 0
         total_rejected = 0
-        total_accounts = 0
 
         # Count from account_requests.json
         if os.path.exists(account_request_file):

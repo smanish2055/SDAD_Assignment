@@ -784,6 +784,150 @@ class EmployerDashboard(BaseDashboard):
         except Exception as e:
             messagebox.showerror("Error", f"An error occurred: {str(e)}")
 
+    def suspicious_notification(self):
+        self.clear_content()
+        tk.Label(self.content_area, text="Pending Transaction Approvals",
+                 font=("Arial", 16, "bold"), bg="white").pack(pady=10)
+
+        # Create frame for pending transactions
+        frame = tk.Frame(self.content_area, bg="white")
+        frame.pack(fill="both", expand=True, padx=20, pady=10)
+
+        # Create treeview to display pending transactions
+        columns = ("Transaction ID", "Sender", "Receiver", "Amount", "Reference", "Date")
+        tree = ttk.Treeview(frame, columns=columns, show="headings", selectmode="browse")
+
+        # Set column headings
+        for col in columns:
+            tree.heading(col, text=col)
+            tree.column(col, width=120, anchor="center")
+
+        # Add scrollbar
+        scrollbar = ttk.Scrollbar(frame, orient="vertical", command=tree.yview)
+        tree.configure(yscrollcommand=scrollbar.set)
+
+        tree.pack(side="left", fill="both", expand=True)
+        scrollbar.pack(side="right", fill="y")
+
+        # Load pending transactions
+        pending_path = "data/pending_transactions.json"
+        if os.path.exists(pending_path):
+            with open(pending_path, "r") as f:
+                pending_txs = json.load(f)
+        else:
+            pending_txs = []
+
+        # Filter only pending transactions
+        pending_txs = [tx for tx in pending_txs if tx["status"] == "pending"]
+
+        if not pending_txs:
+            tk.Label(frame, text="No pending transactions requiring approval.",
+                     font=("Arial", 12), bg="white").pack(pady=20)
+            return
+
+        # Add transactions to treeview
+        for tx in pending_txs:
+            tree.insert("", "end", values=(
+                tx["T_id"],
+                tx["sender_account"],
+                tx["receiver_account"],
+                f"£{tx['amount']:,.2f}",
+                tx["reference"],
+                tx["date"]
+            ))
+
+        # Add approve/reject buttons
+        button_frame = tk.Frame(self.content_area, bg="white")
+        button_frame.pack(pady=10)
+
+        def approve_transaction():
+            selected = tree.focus()
+            if not selected:
+                messagebox.showwarning("Warning", "Please select a transaction first.")
+                return
+
+            tx_data = tree.item(selected)
+            tx_id = tx_data["values"][0]
+
+            self._process_decision(tx_id, "approved")
+            messagebox.showinfo("Success", "Transaction approved successfully.")
+            self.suspicious_notification()  # Refresh the view
+
+        def reject_transaction():
+            selected = tree.focus()
+            if not selected:
+                messagebox.showwarning("Warning", "Please select a transaction first.")
+                return
+
+            tx_data = tree.item(selected)
+            tx_id = tx_data["values"][0]
+
+            self._process_decision(tx_id, "rejected")
+            messagebox.showinfo("Success", "Transaction rejected.")
+            self.suspicious_notification()  # Refresh the view
+
+        tk.Button(button_frame, text="Approve", bg="#27ae60", fg="white",
+                  command=approve_transaction).pack(side="left", padx=10)
+        tk.Button(button_frame, text="Reject", bg="#e74c3c", fg="white",
+                  command=reject_transaction).pack(side="left", padx=10)
+
+    def _process_decision(self, tx_id, decision):
+        """Process employer's decision on a pending transaction"""
+        pending_path = "data/pending_transactions.json"
+        accounts_path = "data/accounts.json"
+        txn_path = "data/transactions.json"
+
+        # Load all data
+        with open(pending_path, "r") as f:
+            pending_txs = json.load(f)
+
+        with open(txn_path, "r") as f:
+            transactions = json.load(f)
+
+        # Find the pending transaction
+        tx_index = None
+        pending_tx = None
+        for i, tx in enumerate(pending_txs):
+            if tx["T_id"] == tx_id:
+                tx_index = i
+                pending_tx = tx
+                break
+
+        if pending_tx is None:
+            messagebox.showerror("Error", "Transaction not found.")
+            return
+
+        now = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+
+        # Update status in transactions.json
+        updated_transactions = []
+        for tx in transactions:
+            if tx.get("T_id") == tx_id:
+                tx["status"] = decision
+                tx["reviewed_by"] = self.username
+                tx["decision_date"] = now
+            updated_transactions.append(tx)
+
+        # Save updated transactions
+        with open(txn_path, "w") as f:
+            json.dump(updated_transactions, f, indent=4)
+
+        if decision == "approved":
+            # Update account balances
+            with open(accounts_path, "r") as f:
+                accounts = json.load(f)
+
+            accounts[pending_tx["sender_account"]]["balance"] -= pending_tx["amount"]
+            accounts[pending_tx["receiver_account"]]["balance"] += pending_tx["amount"]
+
+            with open(accounts_path, "w") as f:
+                json.dump(accounts, f, indent=4)
+
+        # Remove from pending transactions
+        del pending_txs[tx_index]
+        with open(pending_path, "w") as f:
+            json.dump(pending_txs, f, indent=4)
+
     def logout(self):
         self.master.destroy()
         import auth.login

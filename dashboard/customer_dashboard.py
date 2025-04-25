@@ -115,7 +115,8 @@ class CustomerDashboard(BaseDashboard):
 
     def transaction(self):
         self.clear_content()
-        tk.Label(self.content_area, text="Perform Transaction", font=("Arial", 16, "bold"), bg="white").pack(pady=10)
+        tk.Label(self.content_area, text="Perform Transaction", font=("Arial", 16, "bold"), bg="white").pack(
+            pady=10)
 
         form_frame = tk.Frame(self.content_area, bg="white")
         form_frame.pack(pady=10)
@@ -124,7 +125,8 @@ class CustomerDashboard(BaseDashboard):
         entries = {}
 
         for i, label in enumerate(labels):
-            tk.Label(form_frame, text=label + ":", font=("Arial", 12), bg="white").grid(row=i, column=0, sticky="w", pady=5)
+            tk.Label(form_frame, text=label + ":", font=("Arial", 12), bg="white").grid(row=i, column=0, sticky="w",
+                                                                                        pady=5)
             entry = tk.Entry(form_frame, font=("Arial", 12), width=30)
             entry.grid(row=i, column=1, pady=5)
             entries[label] = entry
@@ -165,53 +167,147 @@ class CustomerDashboard(BaseDashboard):
                 messagebox.showerror("Error", "Insufficient balance.")
                 return
 
-            # Perform transaction
-            accounts[sender_acc_no]["balance"] -= amount
-            accounts[acc_no]["balance"] += amount
+            # Check account type and amount limits
+            account_type = accounts[sender_acc_no].get("Account Type", "Personal Account")
 
-            with open(account_path, "w") as f:
-                json.dump(accounts, f, indent=4)
+            if account_type == "Personal Account" and amount > 10000:
+                self._create_pending_transaction(sender_acc_no, acc_no, amount, reference)
+                messagebox.showinfo("Pending Approval",
+                                    "Transaction exceeds personal account limit. Sent for employer review.")
+                return
+            elif account_type == "Business Account" and amount > 20000:
+                messagebox.showerror("Error",
+                                     "Transaction exceeds business account limit (max £20,000).")
+                return
 
-            now = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-            t_id = str(uuid.uuid4())
-            sender_log = {
-                "T_id":t_id,
-                "account_number": sender_acc_no,
-                "type": "debited",
-                "from": sender_acc_no,
-                "to": acc_no,
-                "amount": amount,
-                "reference": reference,
-                "date": now
-            }
-
-            receiver_log = {
-                "T_id": t_id,
-                "account_number": acc_no,
-                "type": "credited",
-                "from": sender_acc_no,
-                "to": acc_no,
-                "amount": amount,
-                "reference": reference,
-                "date": now
-            }
-
-            txn_path = "data/transactions.json"
-            if os.path.exists(txn_path):
-                with open(txn_path, "r") as f:
-                    logs = json.load(f)
-            else:
-                logs = []
-
-            logs.extend([sender_log, receiver_log])
-
-            with open(txn_path, "w") as f:
-                json.dump(logs, f, indent=4)
-
+            # If we get here, transaction is within limits - process immediately
+            self._process_transaction(sender_acc_no, acc_no, amount, reference)
             messagebox.showinfo("Success", "Transaction completed successfully.")
             self.transaction()
 
-        tk.Button(self.content_area, text="Submit", bg="#2980b9", fg="white", font=("Arial", 12, "bold"), command=perform_transaction).pack(pady=20)
+        tk.Button(self.content_area, text="Submit", bg="#2980b9", fg="white",
+                  font=("Arial", 12, "bold"), command=perform_transaction).pack(pady=20)
+
+    def _process_transaction(self, sender_acc_no, receiver_acc_no, amount, reference):
+        """Process an approved transaction immediately"""
+        account_path = "data/accounts.json"
+        with open(account_path, "r") as f:
+            accounts = json.load(f)
+
+        # Update balances
+        accounts[sender_acc_no]["balance"] -= amount
+        accounts[receiver_acc_no]["balance"] += amount
+
+        # Save updated accounts
+        with open(account_path, "w") as f:
+            json.dump(accounts, f, indent=4)
+
+        # Create transaction records
+        now = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+        t_id = str(uuid.uuid4())
+
+        sender_log = {
+            "T_id": t_id,
+            "account_number": sender_acc_no,
+            "type": "debited",
+            "from": sender_acc_no,
+            "to": receiver_acc_no,
+            "amount": amount,
+            "reference": reference,
+            "date": now,
+            "status": "completed"
+        }
+
+        receiver_log = {
+            "T_id": t_id,
+            "account_number": receiver_acc_no,
+            "type": "credited",
+            "from": sender_acc_no,
+            "to": receiver_acc_no,
+            "amount": amount,
+            "reference": reference,
+            "date": now,
+            "status": "completed"
+        }
+
+        # Update transactions.json
+        txn_path = "data/transactions.json"
+        if os.path.exists(txn_path):
+            with open(txn_path, "r") as f:
+                logs = json.load(f)
+        else:
+            logs = []
+
+        logs.extend([sender_log, receiver_log])
+        with open(txn_path, "w") as f:
+            json.dump(logs, f, indent=4)
+
+    def _create_pending_transaction(self, sender_acc_no, receiver_acc_no, amount, reference):
+        """Create a transaction that needs employer approval"""
+        now = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+        t_id = str(uuid.uuid4())
+
+        # Create pending transaction record
+        pending_tx = {
+            "T_id": t_id,
+            "sender_account": sender_acc_no,
+            "receiver_account": receiver_acc_no,
+            "amount": amount,
+            "reference": reference,
+            "date": now,
+            "status": "pending",
+            "reviewed_by": None,
+            "decision": None,
+            "decision_date": None
+        }
+
+        # Add to pending_transactions.json
+        pending_path = "data/pending_transactions.json"
+        if os.path.exists(pending_path):
+            with open(pending_path, "r") as f:
+                pending = json.load(f)
+        else:
+            pending = []
+
+        pending.append(pending_tx)
+        with open(pending_path, "w") as f:
+            json.dump(pending, f, indent=4)
+
+        # Also add to transactions.json with pending status
+        sender_log = {
+            "T_id": t_id,
+            "account_number": sender_acc_no,
+            "type": "debited",
+            "from": sender_acc_no,
+            "to": receiver_acc_no,
+            "amount": amount,
+            "reference": reference,
+            "date": now,
+            "status": "pending"
+        }
+
+        receiver_log = {
+            "T_id": t_id,
+            "account_number": receiver_acc_no,
+            "type": "credited",
+            "from": sender_acc_no,
+            "to": receiver_acc_no,
+            "amount": amount,
+            "reference": reference,
+            "date": now,
+            "status": "pending"
+        }
+
+        txn_path = "data/transactions.json"
+        if os.path.exists(txn_path):
+            with open(txn_path, "r") as f:
+                logs = json.load(f)
+        else:
+            logs = []
+
+        logs.extend([sender_log, receiver_log])
+        with open(txn_path, "w") as f:
+            json.dump(logs, f, indent=4)
 
     def transaction_history_customer(self):
         self.clear_content()
