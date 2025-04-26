@@ -13,7 +13,7 @@ class EmployerDashboard(BaseDashboard):
 
     def show_home(self):
         self.clear_content()
-        tk.Label(self.content_area, text="🏠 Dashboard - Personalized Services", font=("Arial", 18, "bold"),
+        tk.Label(self.content_area, text="🏠 Dashboard - Home", font=("Arial", 18, "bold"),
                  bg="white", fg="#2c3e50").pack(pady=20)
         tk.Label(self.content_area, text=f"Welcome back, {self.username}", font=("Arial", 14),
                  bg="white", fg="#34495e").pack(pady=5)
