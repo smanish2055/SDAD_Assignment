@@ -1,6 +1,5 @@
 import tkinter as tk
 from auth.login import LoginWindow
-from auth.register import RegisterWindow
 
 def main():
     root = tk.Tk()

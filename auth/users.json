@@ -1,42 +1,22 @@
 {
-    "xyz": {
-        "password": "@Manish12",
-        "role": "Manager"
-    },
-    "manish@12": {
-        "password": "@Manish12",
-        "role": "Employer"
-    },
-    "manish@123": {
-        "password": "@Manish12",
-        "role": "Customer"
-    },
-    "manish@1234": {
-        "password": "@Manish12",
-        "role": "Customer"
-    },
-    "manish@11": {
-        "password": "@Manish12",
-        "role": "Manager"
-    },
-    "manish22": {
-        "password": "@Manish12",
-        "role": "Employer"
-    },
-    "manish12": {
-        "password": "@Manish12",
-        "role": "Customer"
-    },
-    "aneesh@12": {
-        "password": "@Manish12",
-        "role": "Customer"
-    },
-    "manish123": {
-        "password": "@Manish12",
-        "role": "Customer"
-    },
     "shah12": {
         "password": "$2b$12$RE8ajJV4Ui7eeK2aYrRwd.corrOw7qnBKJC.ZurXi7oMYz8jaPUN2",
+        "role": "Employer"
+    },
+    "manish_12": {
+        "password": "$2b$12$66fk8p7DOHdVVu06Aotsk.CGwnfYSVC5yIvHAL38Ir2gbPK1MGvCG",
+        "role": "Customer"
+    },
+    "manish_123": {
+        "password": "$2b$12$a06Xe4ZDEfvorqfi6nffHechNzFTsshDWqTc4J4jJwTg/7j3g1Bmm",
+        "role": "Manager"
+    },
+    "manish_1234": {
+        "password": "$2b$12$luIrGycwSj92mdZWWut/8.mtD3DKUvEy69xyoZKbHCMLbuPfc0Try",
+        "role": "Employer"
+    },
+    "manish_77": {
+        "password": "$2b$12$dnpiLusCmcVqS1dwaBPRL.mplsxzUaI/oFP3sHxe8j63RelIWD7fy",
         "role": "Employer"
     }
 }

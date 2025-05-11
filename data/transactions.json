@@ -400,7 +400,9 @@
         "amount": 20000.0,
         "reference": "uwx",
         "date": "2025-04-25 08:15:25",
-        "status": "pending"
+        "status": "rejected",
+        "reviewed_by": "manish_1234",
+        "decision_date": "2025-05-08 21:06:41"
     },
     {
         "T_id": "16d30eff-c22d-4a2a-9cec-7ad9f40eede9",
@@ -411,7 +413,9 @@
         "amount": 20000.0,
         "reference": "uwx",
         "date": "2025-04-25 08:15:25",
-        "status": "pending"
+        "status": "rejected",
+        "reviewed_by": "manish_1234",
+        "decision_date": "2025-05-08 21:06:41"
     },
     {
         "T_id": "2c20d6d8-bb6b-4ed4-ad7b-7958d11edf7e",
@@ -434,5 +438,49 @@
         "reference": "dsd",
         "date": "2025-04-25 08:23:18",
         "status": "pending"
+    },
+    {
+        "T_id": "f0b955b8-f439-4bb3-8d14-607b3aeaf571",
+        "account_number": "6341896",
+        "type": "debited",
+        "from": "6341896",
+        "to": "8061864",
+        "amount": 100.0,
+        "reference": "xys",
+        "date": "2025-05-09 00:42:47",
+        "status": "completed"
+    },
+    {
+        "T_id": "f0b955b8-f439-4bb3-8d14-607b3aeaf571",
+        "account_number": "8061864",
+        "type": "credited",
+        "from": "6341896",
+        "to": "8061864",
+        "amount": 100.0,
+        "reference": "xys",
+        "date": "2025-05-09 00:42:47",
+        "status": "completed"
+    },
+    {
+        "T_id": "59fcfcde-c130-405a-b75a-57cee41ccb19",
+        "account_number": "6341896",
+        "type": "debited",
+        "from": "6341896",
+        "to": "9678021",
+        "amount": 200.0,
+        "reference": "return",
+        "date": "2025-05-09 00:43:42",
+        "status": "completed"
+    },
+    {
+        "T_id": "59fcfcde-c130-405a-b75a-57cee41ccb19",
+        "account_number": "9678021",
+        "type": "credited",
+        "from": "6341896",
+        "to": "9678021",
+        "amount": 200.0,
+        "reference": "return",
+        "date": "2025-05-09 00:43:42",
+        "status": "completed"
     }
 ]

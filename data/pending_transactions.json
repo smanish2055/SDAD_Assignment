@@ -1,17 +1,5 @@
 [
     {
-        "T_id": "16d30eff-c22d-4a2a-9cec-7ad9f40eede9",
-        "sender_account": "8061864",
-        "receiver_account": "9678021",
-        "amount": 20000.0,
-        "reference": "uwx",
-        "date": "2025-04-25 08:15:25",
-        "status": "pending",
-        "reviewed_by": null,
-        "decision": null,
-        "decision_date": null
-    },
-    {
         "T_id": "2c20d6d8-bb6b-4ed4-ad7b-7958d11edf7e",
         "sender_account": "8061864",
         "receiver_account": "9678021",

@@ -20,7 +20,7 @@
         "phone": "+7570689897",
         "email": "manish2055@gmail.com",
         "occupation": "students",
-        "balance": 30000.0,
+        "balance": 30200.0,
         "approved_date": "2025-04-18"
     },
     "8061864": {
@@ -33,7 +33,20 @@
         "email": "smanish20@gmail.com",
         "occupation": "student",
         "Account Type": "Personal Account",
-        "balance": 48000.0,
+        "balance": 48100.0,
         "approved_date": "2025-04-20"
+    },
+    "6341896": {
+        "username": "manish_12",
+        "full_name": "manish",
+        "national_id_number": "939494",
+        "dob": "1997-10-10",
+        "address": "ndfj",
+        "phone": "9811344474",
+        "email": "smanish@gmail.com",
+        "occupation": "student",
+        "account type": "Personal Account",
+        "balance": 700.0,
+        "approved_date": "2025-05-07"
     }
 }

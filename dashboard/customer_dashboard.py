@@ -515,5 +515,6 @@ class CustomerDashboard(BaseDashboard):
         self.master.destroy()
         import auth.login
         root = tk.Tk()
+        root.title("FinSecure - Login")
         root.geometry("400x300")
         auth.login.LoginWindow(root)

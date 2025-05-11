@@ -82,5 +82,26 @@
         "National_Id_Number": "872382",
         "timestamp": "2025-04-24 17:18:55",
         "details": "deposit 5000.0  in 5483237 ."
+    },
+    {
+        "action": "edit",
+        "username": "manish_1234",
+        "National_Id_Number": "7777",
+        "timestamp": "2025-04-28 07:39:22",
+        "details": "Account Request edited for N_ID 7777 done by manish_1234."
+    },
+    {
+        "action": "approve",
+        "username": "shah12",
+        "National_Id_Number": "939494",
+        "timestamp": "2025-05-07 20:42:06",
+        "details": "Account approved for N_ID 939494 Ac (Account No: 6341896) done by shah12"
+    },
+    {
+        "action": "edit",
+        "username": "manish_1234",
+        "National_Id_Number": "83738449",
+        "timestamp": "2025-05-10 06:47:34",
+        "details": "Account Request edited for N_ID 83738449 done by manish_1234."
     }
 ]

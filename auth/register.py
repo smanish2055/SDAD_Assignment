@@ -78,10 +78,10 @@ class RegisterWindow:
             messagebox.showerror("Error", "Passwords do not match.")
             return
 
-        if role == UserRole.EMPLOYER and passkey != "123":
+        if role == UserRole.EMPLOYER and passkey != "@123":
             messagebox.showerror("Error", "Invalid passkey for Employer.")
             return
-        elif role == UserRole.MANAGER and passkey != "456":
+        elif role == UserRole.MANAGER and passkey != "@456":
             messagebox.showerror("Error", "Invalid passkey for Manager.")
             return
 

@@ -742,7 +742,7 @@ class EmployerDashboard(BaseDashboard):
             with open("data/logs.json", "r") as f:
                 logs = json.load(f)
 
-            filtered_logs = [log for log in logs if log.get("National_Id_Number") == nid_number]
+            filtered_logs = [log for log in logs if str(log.get("National_Id_Number")) == str(nid_number)]
 
             # If logs_display_frame exists, destroy it first
             if hasattr(self, 'logs_display_frame') and self.logs_display_frame.winfo_exists():
@@ -932,5 +932,6 @@ class EmployerDashboard(BaseDashboard):
         self.master.destroy()
         import auth.login
         root = tk.Tk()
+        root.title("FinSecure - Login")
         root.geometry("400x300")
         auth.login.LoginWindow(root)
